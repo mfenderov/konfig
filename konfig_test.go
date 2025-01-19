@@ -25,9 +25,19 @@ func TestLoadSimpleConfiguration(t *testing.T) {
 	assert.Equal(t, "[one two three]", konfig.GetEnv("list"))
 }
 
-func TestLoadConfigurationWithNestedProperties(t *testing.T) {
+func TestLoadConfigurationWithEmptyProperties(t *testing.T) {
 	konfig.ClearEnv()
 
 	err := konfig.LoadConfiguration("test-data/application-empty.yaml")
-	assert.EqualError(t, err, "value for 'key' db.password is nil")
+	assert.EqualError(t, err, "property 'db.password' is nil")
+}
+
+func TestLoadConfigurationWithEmptyPropertyWithDefault(t *testing.T) {
+	konfig.ClearEnv()
+
+	err := konfig.LoadConfiguration("test-data/application-empty-with-default.yaml")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "postgres", konfig.GetEnv("db.password"))
+	assert.Equal(t, "https://", konfig.GetEnv("db.host"))
 }

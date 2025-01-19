@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func localConfigMapFromFile(pathToConfigFile string) (map[string]interface{}, error) {
@@ -15,7 +16,7 @@ func localConfigMapFromFile(pathToConfigFile string) (map[string]interface{}, er
 	if err != nil {
 		return nil, fmt.Errorf("error reading configuration file: %w", err)
 	}
-	configFile = []byte(os.ExpandEnv(string(configFile)))
+	configFile = []byte(os.Expand(string(configFile), enrichValue))
 
 	configMap := make(map[string]interface{})
 	err = yaml.Unmarshal(configFile, configMap)
@@ -25,10 +26,25 @@ func localConfigMapFromFile(pathToConfigFile string) (map[string]interface{}, er
 	return configMap, nil
 }
 
+func enrichValue(value string) string {
+	index := strings.Index(value, ":")
+	if index == -1 {
+		return GetEnv(value)
+	}
+
+	key := value[:index]
+	defaultValue := value[index+1:]
+	envValue := GetEnv(key)
+	if envValue != "" {
+		return envValue
+	}
+	return defaultValue
+}
+
 func postProcessConfig(resultConfigMap map[string]interface{}) error {
 	for key, value := range resultConfigMap {
 		if value == nil {
-			return fmt.Errorf("value for 'key' %s is nil", key)
+			return fmt.Errorf("property '%s' is nil", key)
 		}
 		err := SetEnv(key, fmt.Sprintf("%v", value))
 		if err != nil {
