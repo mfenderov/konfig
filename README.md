@@ -1,2 +1,3 @@
 # konfig
-Simple configuration manager for Go Lang
+
+Simple Spring-Framework like configuration manager for Go Lang
