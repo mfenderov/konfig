@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+log:
+  level: debug
+
+db:
+  host: https://$POSTGRES_HOST
+  port: 5432
+  user: user
+  password: ${POSTGRES_PASSWORD}
+  database: database
+
+list:
+  - one
+  - two
+  - three
+
+
