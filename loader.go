@@ -2,12 +2,13 @@ package konfig
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+	"golang.org/x/tools/go/packages"
+	"gopkg.in/yaml.v3"
 )
 
 func localConfigMapFromFile(pathToConfigFile string) (map[string]interface{}, error) {

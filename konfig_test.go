@@ -1,8 +1,9 @@
 package konfig_test
 
 import (
-	"github.com/mfenderov/konfig"
 	"testing"
+
+	"github.com/mfenderov/konfig"
 
 	"github.com/stretchr/testify/assert"
 )
