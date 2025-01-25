@@ -14,7 +14,7 @@ func TestLoadSimpleConfiguration(t *testing.T) {
 	_ = konfig.SetEnv("POSTGRES_PASSWORD", "12345")
 	_ = konfig.SetEnv("POSTGRES_HOST", "localhost")
 
-	err := konfig.LoadConfiguration("test-data/application.yaml")
+	err := konfig.LoadFrom("test-data/application.yaml")
 	assert.NoError(t, err)
 
 	assert.Equal(t, "12345", konfig.GetEnv("db.password"))
@@ -29,14 +29,14 @@ func TestLoadSimpleConfiguration(t *testing.T) {
 func TestLoadConfigurationWithEmptyProperties(t *testing.T) {
 	konfig.ClearEnv()
 
-	err := konfig.LoadConfiguration("test-data/application-empty.yaml")
+	err := konfig.LoadFrom("test-data/application-empty.yaml")
 	assert.EqualError(t, err, "property 'db.password' is nil")
 }
 
 func TestLoadConfigurationWithEmptyPropertyWithDefault(t *testing.T) {
 	konfig.ClearEnv()
 
-	err := konfig.LoadConfiguration("test-data/application-empty-with-default.yaml")
+	err := konfig.LoadFrom("test-data/application-empty-with-default.yaml")
 	assert.NoError(t, err)
 
 	assert.Equal(t, "postgres", konfig.GetEnv("db.password"))

@@ -12,19 +12,30 @@ import (
 )
 
 func localConfigMapFromFile(pathToConfigFile string) (map[string]interface{}, error) {
-	rootPath, _ := findRootPath()
-	configFile, err := os.ReadFile(filepath.Join(rootPath, pathToConfigFile))
+	configFile, err := readConfigFile(pathToConfigFile)
 	if err != nil {
 		return nil, fmt.Errorf("error reading configuration file: %w", err)
 	}
-	configFile = []byte(os.Expand(string(configFile), enrichValue))
+	configFile = os.Expand(configFile, enrichValue)
 
 	configMap := make(map[string]interface{})
-	err = yaml.Unmarshal(configFile, configMap)
+	err = yaml.Unmarshal([]byte(configFile), configMap)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling configuration file: %w", err)
 	}
 	return configMap, nil
+}
+
+func readConfigFile(pathToConfigFile string) (string, error) {
+	rootPath, err := findRootPath()
+	if err != nil {
+		return "", fmt.Errorf("error finding root path: %w", err)
+	}
+	configFile, err := os.ReadFile(filepath.Join(rootPath, pathToConfigFile))
+	if err != nil {
+		return "", fmt.Errorf("error reading configuration file: %w", err)
+	}
+	return string(configFile), nil
 }
 
 func enrichValue(value string) string {
