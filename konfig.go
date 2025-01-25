@@ -21,22 +21,23 @@ func ClearEnv() {
 
 const defaultConfigFolder = "resources"
 const defaultConfigFileName = "application"
+const fileNameFormat = "%s/%s%s%s"
 
 var defaultConfigFileExtensions = []string{".yaml", ".yml"}
 var defaultProfile = prodProfile
 
-func Load() {
+func Load() error {
 	profileSuffix := ""
 	if !IsProdProfile() {
 		profileSuffix = "-" + getProfile()
 	}
 	for _, ext := range defaultConfigFileExtensions {
-		configFilePath := fmt.Sprintf("%s/%s%s%s", defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
+		configFilePath := fmt.Sprintf(fileNameFormat, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
 		if _, err := os.Stat(configFilePath); err == nil {
-			LoadFrom(configFilePath)
-			return
+			return LoadFrom(configFilePath)
 		}
 	}
+	return errors.Errorf("config file not found in %s", defaultConfigFolder)
 }
 
 func LoadFrom(pathToConfigFile string) error {

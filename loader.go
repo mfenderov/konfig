@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
 	"gopkg.in/yaml.v3"
 )
 
@@ -98,15 +97,22 @@ func updatePrefix(prefix string, key string) string {
 }
 
 func findRootPath() (string, error) {
-	cfg := &packages.Config{Mode: packages.NeedModule}
-	pkgs, err := packages.Load(cfg, ".")
+	dir, err := os.Getwd()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to load packages")
+		return "", errors.Wrap(err, "failed to get current directory")
 	}
 
-	if len(pkgs) > 0 && pkgs[0].Module != nil {
-		return pkgs[0].Module.Dir, nil
-	} else {
-		return "", errors.Wrap(err, "failed to find root path")
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+
+		parentDir := filepath.Dir(dir)
+		if parentDir == dir {
+			break
+		}
+		dir = parentDir
 	}
+
+	return "", errors.New("failed to find root path")
 }
