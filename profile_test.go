@@ -14,6 +14,7 @@ func TestProfile_ShouldReturnEmtpyString(t *testing.T) {
 }
 
 func TestProfile_ShouldReturnDevTrue(t *testing.T) {
+	resetProfile()
 	os.Args = []string{os.Args[0], "-p", "dev"}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -22,6 +23,7 @@ func TestProfile_ShouldReturnDevTrue(t *testing.T) {
 }
 
 func TestProfile_ShouldReturnProdTrue(t *testing.T) {
+	resetProfile()
 	os.Args = []string{os.Args[0], "-p", "prod"}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -30,6 +32,7 @@ func TestProfile_ShouldReturnProdTrue(t *testing.T) {
 }
 
 func TestProfile_ShouldReturnCustomerProfileTrue(t *testing.T) {
+	resetProfile()
 	os.Args = []string{os.Args[0], "-p", "test"}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -38,9 +41,7 @@ func TestProfile_ShouldReturnCustomerProfileTrue(t *testing.T) {
 }
 
 func TestProfile_ShouldReturnFalse(t *testing.T) {
-	os.Args = []string{os.Args[0]}
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-
+	resetProfile()
 	profile := IsProfile("dev123")
 	assert.False(t, profile)
 }

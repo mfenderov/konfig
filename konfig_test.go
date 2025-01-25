@@ -42,3 +42,8 @@ func TestLoadConfigurationWithEmptyPropertyWithDefault(t *testing.T) {
 	assert.Equal(t, "postgres", konfig.GetEnv("db.password"))
 	assert.Equal(t, "https://", konfig.GetEnv("db.host"))
 }
+
+func Test_Load(t *testing.T) {
+	err := konfig.Load()
+	assert.NoError(t, err)
+}
