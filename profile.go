@@ -2,7 +2,6 @@ package konfig
 
 import (
 	"flag"
-	"os"
 	"sync"
 )
 
@@ -33,11 +32,4 @@ func getProfile() string {
 		}
 	})
 	return activeProfile
-}
-
-func resetProfile() {
-	activeProfile = ""
-	once = sync.Once{}
-	os.Args = []string{os.Args[0]}
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 }

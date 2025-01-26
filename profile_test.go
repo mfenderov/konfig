@@ -3,45 +3,57 @@ package konfig
 import (
 	"flag"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestProfile_ShouldReturnEmtpyString(t *testing.T) {
+func TestProfile_ShouldReturnEmptyString(t *testing.T) {
+	resetCommandLineFlags()
+
 	profile := getProfile()
 	assert.Empty(t, profile)
 }
 
 func TestProfile_ShouldReturnDevTrue(t *testing.T) {
-	resetProfile()
-	os.Args = []string{os.Args[0], "-p", "dev"}
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	resetCommandLineFlags()
+	setCommandLineFlag("dev")
 
 	profile := IsDevProfile()
 	assert.True(t, profile)
 }
 
 func TestProfile_ShouldReturnProdTrue(t *testing.T) {
-	resetProfile()
-	os.Args = []string{os.Args[0], "-p", "prod"}
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	resetCommandLineFlags()
+	setCommandLineFlag("prod")
 
 	profile := IsProdProfile()
 	assert.True(t, profile)
 }
 
 func TestProfile_ShouldReturnCustomerProfileTrue(t *testing.T) {
-	resetProfile()
-	os.Args = []string{os.Args[0], "-p", "test"}
-	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	resetCommandLineFlags()
+	setCommandLineFlag("test")
 
 	profile := IsProfile("test")
 	assert.True(t, profile)
 }
 
 func TestProfile_ShouldReturnFalse(t *testing.T) {
-	resetProfile()
+	resetCommandLineFlags()
 	profile := IsProfile("dev123")
 	assert.False(t, profile)
+}
+
+func resetCommandLineFlags() {
+	activeProfile = ""
+	once = sync.Once{}
+	os.Args = []string{os.Args[0]}
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+}
+
+func setCommandLineFlag(p string) {
+	os.Args = []string{os.Args[0], "-p", p}
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 }
