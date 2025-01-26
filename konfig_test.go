@@ -46,4 +46,6 @@ func TestLoadConfigurationWithEmptyPropertyWithDefault(t *testing.T) {
 func Test_Load(t *testing.T) {
 	err := konfig.Load()
 	assert.NoError(t, err)
+	port := konfig.GetEnv("server.port")
+	assert.Equal(t, "1234", port)
 }

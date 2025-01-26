@@ -21,7 +21,8 @@ func ClearEnv() {
 
 const defaultConfigFolder = "resources"
 const defaultConfigFileName = "application"
-const fileNameFormat = "%s/%s/%s%s%s"
+const fullFileNameFormat = "%s/%s"
+const filePathWithinProjectFormat = "%s/%s%s%s"
 
 var defaultConfigFileExtensions = []string{".yaml", ".yml"}
 var defaultProfile = prodProfile
@@ -37,9 +38,10 @@ func Load() error {
 	}
 
 	for _, ext := range defaultConfigFileExtensions {
-		configFilePath := fmt.Sprintf(fileNameFormat, path, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
+		filePathWithinProject := fmt.Sprintf(filePathWithinProjectFormat, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
+		configFilePath := fmt.Sprintf(fullFileNameFormat, path, filePathWithinProject)
 		if _, err := os.Stat(configFilePath); err == nil {
-			return LoadFrom(configFilePath)
+			return LoadFrom(filePathWithinProject)
 		}
 	}
 	return errors.Errorf("config file not found in '%s'. Default file name is '%s', and suppoted extensions are %v", defaultConfigFolder, defaultConfigFileName, defaultConfigFileExtensions)
@@ -52,8 +54,4 @@ func LoadFrom(pathToConfigFile string) error {
 	}
 	resultConfigMap := buildEnvVariables(configMap)
 	return postProcessConfig(resultConfigMap)
-}
-
-func loadDefault() {
-
 }
