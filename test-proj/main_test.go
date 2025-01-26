@@ -9,6 +9,9 @@ import (
 )
 
 func Test_WithoutProfile(t *testing.T) {
+	os.Args = []string{os.Args[0]}
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
 	main()
 
 	actual := konfig.GetEnv("some.property.value")

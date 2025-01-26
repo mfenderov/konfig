@@ -3,7 +3,6 @@ package konfig
 import (
 	"flag"
 	"os"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,8 +46,6 @@ func TestProfile_ShouldReturnFalse(t *testing.T) {
 }
 
 func resetCommandLineFlags() {
-	activeProfile = ""
-	once = sync.Once{}
 	os.Args = []string{os.Args[0]}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 }
