@@ -1,4 +1,4 @@
-name: Test
+name: PR
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Dependencies
-        run: make dependencies
+        run: make deps
 
       - name: Test
         run: make test
