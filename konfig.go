@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -68,13 +67,9 @@ func loadProfiled() error {
 	return nil
 }
 
-var setupLoggerOnce sync.Once
-
 func setupLogger() {
-	setupLoggerOnce.Do(func() {
-		logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-		slog.SetDefault(logger)
-	})
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	slog.SetDefault(logger)
 }
 
 func LoadFrom(pathToConfigFile string) error {

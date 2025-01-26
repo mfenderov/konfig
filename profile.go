@@ -1,11 +1,24 @@
 package konfig
 
 import (
-	"flag"
+	"github.com/spf13/pflag"
 )
 
 const devProfile = "dev"
 const prodProfile = "prod"
+
+var parsedProfile string
+
+func init() {
+	pflag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
+	pflag.StringVarP(&parsedProfile, "profile", "p", "", "Application profile")
+}
+
+func getProfile() string {
+	parsedProfile = ""
+	pflag.Parse()
+	return parsedProfile
+}
 
 func IsProdProfile() bool {
 	return getProfile() == prodProfile
@@ -17,13 +30,4 @@ func IsDevProfile() bool {
 
 func IsProfile(profile string) bool {
 	return getProfile() == profile
-}
-
-func getProfile() string {
-	profile := flag.String("p", "", "profile to use")
-	flag.Parse()
-	if profile != nil {
-		return *profile
-	}
-	return ""
 }

@@ -54,3 +54,11 @@ func setCommandLineFlag(p string) {
 	os.Args = []string{os.Args[0], "-p", p}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 }
+
+func TestGetProfile_MoreFlags(t *testing.T) {
+	os.Args = []string{os.Args[0], "-p", "test", "-d", "dev", "-t", "prod"}
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+	profile := getProfile()
+	assert.Equal(t, "test", profile)
+}
