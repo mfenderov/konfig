@@ -5,26 +5,37 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
 	"gopkg.in/yaml.v3"
 )
 
 func localConfigMapFromFile(pathToConfigFile string) (map[string]interface{}, error) {
-	rootPath, _ := findRootPath()
-	configFile, err := os.ReadFile(filepath.Join(rootPath, pathToConfigFile))
+	configFile, err := readConfigFile(pathToConfigFile)
 	if err != nil {
 		return nil, fmt.Errorf("error reading configuration file: %w", err)
 	}
-	configFile = []byte(os.Expand(string(configFile), enrichValue))
+	configFile = os.Expand(configFile, enrichValue)
 
 	configMap := make(map[string]interface{})
-	err = yaml.Unmarshal(configFile, configMap)
+	err = yaml.Unmarshal([]byte(configFile), configMap)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling configuration file: %w", err)
 	}
 	return configMap, nil
+}
+
+func readConfigFile(pathToConfigFile string) (string, error) {
+	rootPath, err := findRootPath()
+	if err != nil {
+		return "", fmt.Errorf("error finding root path: %w", err)
+	}
+	configFile, err := os.ReadFile(filepath.Join(rootPath, pathToConfigFile))
+	if err != nil {
+		return "", fmt.Errorf("error reading configuration file: %w", err)
+	}
+	return string(configFile), nil
 }
 
 func enrichValue(value string) string {
@@ -86,16 +97,34 @@ func updatePrefix(prefix string, key string) string {
 	return fmt.Sprintf("%s.%s", prefix, key)
 }
 
-func findRootPath() (string, error) {
-	cfg := &packages.Config{Mode: packages.NeedModule}
-	pkgs, err := packages.Load(cfg, ".")
-	if err != nil {
-		return "", errors.Wrap(err, "failed to load packages")
-	}
+type root struct {
+	path string
+	err  error
+	once sync.Once
+}
 
-	if len(pkgs) > 0 && pkgs[0].Module != nil {
-		return pkgs[0].Module.Dir, nil
-	} else {
-		return "", errors.Wrap(err, "failed to find root path")
-	}
+func findRootPath() (string, error) {
+	root := root{}
+	root.once.Do(func() {
+		dir, err := os.Getwd()
+		if err != nil {
+			root.path, root.err = "", errors.Wrap(err, "failed to get current directory")
+		}
+
+		for {
+			if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+				root.path, root.err = dir, nil
+				return
+			}
+
+			parentDir := filepath.Dir(dir)
+			if parentDir == dir {
+				break
+			}
+			dir = parentDir
+		}
+
+		root.path, root.err = "", errors.New("failed to find root path")
+	})
+	return root.path, root.err
 }
