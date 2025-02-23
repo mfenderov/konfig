@@ -1,9 +1,8 @@
 name: PR
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
+    types: [ opened, synchronize, reopened, edited ]
     branches: [ "main" ]
 
 jobs:
@@ -22,3 +21,10 @@ jobs:
 
       - name: Test
         run: make test
+  ValidatePR:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Semantic Pull Request
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

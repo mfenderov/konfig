@@ -34,8 +34,8 @@ func init() {
 }
 func Load() error {
 	now := time.Now()
-	slog.Debug("Initializing konfig...")
-	defer func() { slog.Debug("Konfig initialized", "duration", time.Since(now).String()) }()
+	slog.Info("Initializing konfig...")
+	defer func() { slog.Info("Konfig initialized", "duration", time.Since(now).String()) }()
 	err := loadDefault()
 	if err != nil {
 		return errors.Wrap(err, "error loading default config")
