@@ -1,8 +1,6 @@
 name: PR
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -10,6 +8,13 @@ jobs:
   Test:
     runs-on: ubuntu-latest
     steps:
+      - name: Conventional Commit In Pull Requests
+        uses: ytanikin/pr-conventional-commits@1.4.1
+        with:
+          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
+          add_label: 'true'
+          add_scope_label: 'true'
+
       - uses: actions/checkout@v4
 
       - name: Set up Go
