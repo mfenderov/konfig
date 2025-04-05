@@ -1,5 +1,7 @@
 module test-proj
 
+go 1.24
+
 require (
 	github.com/mfenderov/konfig v0.3.1
 	github.com/stretchr/testify v1.10.0
@@ -14,7 +16,3 @@ require (
 )
 
 replace github.com/mfenderov/konfig => ../
-
-go 1.24
-
-toolchain go1.24.0
