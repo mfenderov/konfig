@@ -5,9 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
-	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -95,36 +93,4 @@ func updatePrefix(prefix string, key string) string {
 		return key
 	}
 	return fmt.Sprintf("%s.%s", prefix, key)
-}
-
-type root struct {
-	path string
-	err  error
-	once sync.Once
-}
-
-func findRootPath() (string, error) {
-	root := root{}
-	root.once.Do(func() {
-		dir, err := os.Getwd()
-		if err != nil {
-			root.path, root.err = "", errors.Wrap(err, "failed to get current directory")
-		}
-
-		for {
-			if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-				root.path, root.err = dir, nil
-				return
-			}
-
-			parentDir := filepath.Dir(dir)
-			if parentDir == dir {
-				break
-			}
-			dir = parentDir
-		}
-
-		root.path, root.err = "", errors.New("failed to find root path")
-	})
-	return root.path, root.err
 }
