@@ -63,3 +63,62 @@ func TestLoad_WithTestProfile(t *testing.T) {
 	port := GetEnv("server.port")
 	assert.Equal(t, "4321", port)
 }
+
+func TestLoadFrom_NonExistentFile(t *testing.T) {
+	ClearEnv()
+	err := LoadFrom("test-data/non-existent.yaml")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to read config file")
+}
+
+func TestLoadFrom_InvalidYAML(t *testing.T) {
+	ClearEnv()
+	err := LoadFrom("test-data/invalid.yaml")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to unmarshal config file")
+}
+
+func TestLoadFrom_NestedConfiguration(t *testing.T) {
+	ClearEnv()
+	err := LoadFrom("test-data/nested.yaml")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "value1", GetEnv("level1.level2.key1"))
+	assert.Equal(t, "value2", GetEnv("level1.level2.key2"))
+	assert.Equal(t, "[1 2 3]", GetEnv("level1.array"))
+}
+
+func TestLoadFrom_EmptyFile(t *testing.T) {
+	ClearEnv()
+	err := LoadFrom("test-data/empty.yaml")
+	assert.NoError(t, err, "Empty config file should be allowed")
+}
+
+func TestEnvVariableOverride(t *testing.T) {
+	ClearEnv()
+
+	// Set environment variable that should override config
+	_ = SetEnv("CUSTOM_VALUE", "override_value")
+
+	err := LoadFrom("test-data/env-override.yaml")
+	assert.NoError(t, err)
+
+	// Should use environment variable value instead of default
+	assert.Equal(t, "override_value", GetEnv("custom.key"))
+	// Should use default value when env var is not set
+	assert.Equal(t, "default_value", GetEnv("custom.key2"))
+}
+
+func TestLoadFrom_InvalidPath(t *testing.T) {
+	ClearEnv()
+	err := LoadFrom("")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "config file path cannot be empty")
+}
+
+func TestLoadFrom_InvalidExtension(t *testing.T) {
+	ClearEnv()
+	err := LoadFrom("test-data/config.txt")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "config file must have .yml or .yaml extension")
+}

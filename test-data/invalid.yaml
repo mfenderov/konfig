@@ -1,0 +1,5 @@
+invalid:
+  - this is not valid yaml
+    this should break
+  : invalid key
+  [broken array 
