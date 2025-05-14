@@ -77,7 +77,10 @@ func LoadFrom(pathToConfigFile string) error {
 	if err != nil {
 		return errors.Wrapf(err, "error loading config from %s", pathToConfigFile)
 	}
-	resultConfigMap := buildEnvVariables(configMap)
+	resultConfigMap, err := buildEnvVariables(configMap)
+	if err != nil {
+		return errors.Wrap(err, "error building environment variables")
+	}
 	return postProcessConfig(resultConfigMap)
 }
 
