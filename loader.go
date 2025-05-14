@@ -6,16 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
-)
-
-var (
-	rootPathOnce sync.Once
-	rootPath     string
-	rootPathErr  error
 )
 
 func localConfigMapFromFile(pathToConfigFile string) (map[string]any, error) {
@@ -84,7 +77,7 @@ func enrichValue(value string) string {
 	return defaultValue
 }
 
-func postProcessConfig(resultConfigMap map[string]interface{}) error {
+func postProcessConfig(resultConfigMap map[string]any) error {
 	for key, value := range resultConfigMap {
 		if value == nil {
 			return fmt.Errorf("property '%s' is nil", key)
