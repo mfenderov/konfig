@@ -1,6 +1,8 @@
 package konfig
 
 import (
+	"flag"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,9 +55,11 @@ func TestLoad_WithoutProfile(t *testing.T) {
 
 func TestLoad_WithTestProfile(t *testing.T) {
 	ClearEnv()
-	resetCommandLineFlags()
 
-	setCommandLineFlag("test")
+	// Set up command-line flags for the test profile
+	os.Args = []string{os.Args[0], "-p", "test"}
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	ResetProfileInitialized()
 
 	err := Load()
 	assert.NoError(t, err)

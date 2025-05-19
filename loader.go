@@ -48,43 +48,54 @@ func readConfigFile(pathToConfigFile string) (string, error) {
 	return string(configFile), nil
 }
 
+// enrichValue processes environment variable references in configuration values
+// It supports the format ${ENV_VAR} or ${ENV_VAR:default_value}
 func enrichValue(value string) string {
 	if value == "" {
 		return ""
 	}
 
+	// Find the position of the default value separator ":"
 	index := strings.Index(value, ":")
 	if index == -1 {
-		// No default value provided
-		envValue := GetEnv(value)
+		// No default value provided, format is ${ENV_VAR}
+		envKey := value
+		envValue := GetEnv(envKey)
 		if envValue == "" {
-			slog.Warn("Environment variable not found and no default provided", "key", value)
+			slog.Warn("Environment variable not found and no default provided", "key", envKey)
 		}
 		return envValue
 	}
 
-	key := value[:index]
-	if key == "" {
+	// Format is ${ENV_VAR:default_value}
+	envKey := value[:index]
+	if envKey == "" {
 		slog.Warn("Empty environment variable key with default value", "value", value)
 		return value[index+1:] // Return default value
 	}
 
 	defaultValue := value[index+1:]
-	envValue := GetEnv(key)
+	envValue := GetEnv(envKey)
 	if envValue != "" {
 		return envValue
 	}
+
+	// Use default value if environment variable is not set or empty
 	return defaultValue
 }
 
 func postProcessConfig(resultConfigMap map[string]any) error {
+	if resultConfigMap == nil {
+		return errors.New("result config map cannot be nil")
+	}
+
 	for key, value := range resultConfigMap {
 		if value == nil {
-			return fmt.Errorf("property '%s' is nil", key)
+			return errors.Errorf("property '%s' is nil", key)
 		}
 		err := SetEnv(key, fmt.Sprintf("%v", value))
 		if err != nil {
-			return fmt.Errorf("error setting environment variable: %w", err)
+			return errors.Wrap(err, "error setting environment variable")
 		}
 	}
 	return nil

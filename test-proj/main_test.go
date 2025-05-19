@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/mfenderov/konfig"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/mfenderov/konfig"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_WithoutProfile(t *testing.T) {
@@ -21,6 +22,7 @@ func Test_WithoutProfile(t *testing.T) {
 func Test_WithProfile(t *testing.T) {
 	os.Args = []string{os.Args[0], "-p", "dev"}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	konfig.ResetProfileInitialized()
 
 	main()
 

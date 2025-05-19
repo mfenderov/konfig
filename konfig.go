@@ -48,23 +48,13 @@ func loadProfiled() error {
 	now := time.Now()
 	slog.Debug("Loading profiled config")
 	defer func() { slog.Debug("Profiled config loaded", "duration", time.Since(now).String()) }()
+
 	profileSuffix := getProfile()
 	if profileSuffix == "" {
 		return nil
 	}
-	path, err := findRootPath()
-	if err != nil {
-		return errors.Wrap(err, "error finding root path")
-	}
 
-	for _, ext := range defaultConfigFileExtensions {
-		filePathWithinProject := fmt.Sprintf(filePathWithProfileFormat, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
-		configFilePath := fmt.Sprintf(fullFileNameFormat, path, filePathWithinProject)
-		if _, err := os.Stat(configFilePath); err == nil {
-			return LoadFrom(filePathWithinProject)
-		}
-	}
-	return nil
+	return loadConfigWithFormat(filePathWithProfileFormat, profileSuffix)
 }
 
 func setupLogger() {
@@ -88,16 +78,28 @@ func loadDefault() error {
 	now := time.Now()
 	slog.Debug("Loading default config", "folder", defaultConfigFolder, "file", defaultConfigFileName, "extensions", defaultConfigFileExtensions)
 	defer func() { slog.Debug("Default config loaded", "duration", time.Since(now).String()) }()
+
+	return loadConfigWithFormat(filePathWithoutProfileFormat, "")
+}
+
+// loadConfigWithFormat loads configuration using the specified format and profile suffix
+func loadConfigWithFormat(format string, profileSuffix string) error {
 	path, err := findRootPath()
 	if err != nil {
 		return errors.Wrap(err, "error finding root path")
 	}
 
 	for _, ext := range defaultConfigFileExtensions {
-		filePathWithinProject := fmt.Sprintf(filePathWithoutProfileFormat, defaultConfigFolder, defaultConfigFileName, ext)
-		absoluteConfigFilePath := fmt.Sprintf(fullFileNameFormat, path, filePathWithinProject)
-		if _, err := os.Stat(absoluteConfigFilePath); err == nil {
-			return LoadFrom(filePathWithinProject)
+		var filePathWithinProject string
+		if profileSuffix == "" {
+			filePathWithinProject = fmt.Sprintf(format, defaultConfigFolder, defaultConfigFileName, ext)
+		} else {
+			filePathWithinProject = fmt.Sprintf(format, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
+		}
+
+		configFilePath := fmt.Sprintf(fullFileNameFormat, path, filePathWithinProject)
+		if _, err := os.Stat(configFilePath); err == nil {
+			return LoadFrom(configFilePath)
 		}
 	}
 	return nil
