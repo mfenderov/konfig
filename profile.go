@@ -8,15 +8,24 @@ const devProfile = "dev"
 const prodProfile = "prod"
 
 var parsedProfile string
+var profileInitialized bool
 
 func init() {
 	pflag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 	pflag.StringVarP(&parsedProfile, "profile", "p", "", "Application profile")
 }
 
-func getProfile() string {
+// ResetProfileInitialized is used in tests to reset the profile initialization state
+func ResetProfileInitialized() {
+	profileInitialized = false
 	parsedProfile = ""
-	pflag.Parse()
+}
+
+func getProfile() string {
+	if !profileInitialized {
+		pflag.Parse()
+		profileInitialized = true
+	}
 	return parsedProfile
 }
 

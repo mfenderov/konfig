@@ -48,16 +48,19 @@ func TestProfile_ShouldReturnFalse(t *testing.T) {
 func resetCommandLineFlags() {
 	os.Args = []string{os.Args[0]}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	ResetProfileInitialized()
 }
 
 func setCommandLineFlag(p string) {
 	os.Args = []string{os.Args[0], "-p", p}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	ResetProfileInitialized()
 }
 
 func TestGetProfile_MoreFlags(t *testing.T) {
 	os.Args = []string{os.Args[0], "-p", "test", "-d", "dev", "-t", "prod"}
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	ResetProfileInitialized()
 
 	profile := getProfile()
 	assert.Equal(t, "test", profile)
