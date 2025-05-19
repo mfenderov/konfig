@@ -31,12 +31,19 @@ func readConfigFile(pathToConfigFile string) (string, error) {
 		return "", errors.New("config file path cannot be empty")
 	}
 
-	rootPath, err := findRootPath()
-	if err != nil {
-		return "", errors.Wrap(err, "failed to find root path")
+	var fullPath string
+	if filepath.IsAbs(pathToConfigFile) {
+		// If the path is already absolute, use it directly
+		fullPath = pathToConfigFile
+	} else {
+		// Otherwise, join it with the root path
+		rootPath, err := findRootPath()
+		if err != nil {
+			return "", errors.Wrap(err, "failed to find root path")
+		}
+		fullPath = filepath.Join(rootPath, pathToConfigFile)
 	}
 
-	fullPath := filepath.Join(rootPath, pathToConfigFile)
 	if !strings.HasSuffix(fullPath, ".yml") && !strings.HasSuffix(fullPath, ".yaml") {
 		return "", errors.New("config file must have .yml or .yaml extension")
 	}
