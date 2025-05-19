@@ -90,14 +90,14 @@ func loadConfigWithFormat(format string, profileSuffix string) error {
 	}
 
 	for _, ext := range defaultConfigFileExtensions {
-		var filePathWithinProject string
+		var relativeConfigPath string
 		if profileSuffix == "" {
-			filePathWithinProject = fmt.Sprintf(format, defaultConfigFolder, defaultConfigFileName, ext)
+			relativeConfigPath = fmt.Sprintf(format, defaultConfigFolder, defaultConfigFileName, ext)
 		} else {
-			filePathWithinProject = fmt.Sprintf(format, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
+			relativeConfigPath = fmt.Sprintf(format, defaultConfigFolder, defaultConfigFileName, profileSuffix, ext)
 		}
 
-		configFilePath := fmt.Sprintf(fullFileNameFormat, path, filePathWithinProject)
+		configFilePath := fmt.Sprintf(fullFileNameFormat, path, relativeConfigPath)
 		if _, err := os.Stat(configFilePath); err == nil {
 			return LoadFrom(configFilePath)
 		}
