@@ -1,6 +1,7 @@
 package konfig
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"testing"
@@ -206,14 +207,14 @@ func BenchmarkLoadInto_ManyFields(b *testing.B) {
 
 	// Set every other field to test mixed env/default performance
 	for i := 1; i <= 20; i += 2 {
-		key := "benchmany.field" + strconv.Sprintf("%02d", i)
-		value := "env_value" + strconv.Sprintf("%02d", i)
+		key := "benchmany.field" + fmt.Sprintf("%02d", i)
+		value := "env_value" + fmt.Sprintf("%02d", i)
 		os.Setenv(key, value)
 	}
 
 	defer func() {
 		for i := 1; i <= 20; i += 2 {
-			key := "benchmany.field" + strconv.Sprintf("%02d", i)
+			key := "benchmany.field" + fmt.Sprintf("%02d", i)
 			os.Unsetenv(key)
 		}
 	}()
