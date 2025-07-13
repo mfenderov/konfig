@@ -7,7 +7,39 @@ import (
 	"strconv"
 )
 
-// LoadInto loads configuration into a struct using konfig tags
+// LoadInto loads configuration into a Go struct using struct tags for type-safe configuration access.
+//
+// This function first calls Load() to initialize konfig, then uses reflection to populate
+// the provided struct based on `konfig` and `default` struct tags.
+//
+// Struct Tag Usage:
+//   - `konfig:"key.path"` - Maps the field to a configuration key (supports dot notation)
+//   - `default:"value"` - Provides a default value if the configuration key is not set
+//   - Fields without `konfig` tags are ignored
+//
+// The config parameter must be a pointer to a struct. Nested structs are supported
+// and will be populated recursively.
+//
+// Example:
+//
+//	type DatabaseConfig struct {
+//	    Host     string `konfig:"host" default:"localhost"`
+//	    Port     string `konfig:"port" default:"5432"`
+//	    Password string `konfig:"password"`
+//	}
+//	
+//	type Config struct {
+//	    AppName  string         `konfig:"app.name" default:"MyApp"`
+//	    Database DatabaseConfig `konfig:"database"`
+//	}
+//	
+//	var cfg Config
+//	err := konfig.LoadInto(&cfg)
+//	if err != nil {
+//	    log.Fatal("Failed to load config:", err)
+//	}
+//	
+//	fmt.Printf("App: %s, DB: %s:%s\n", cfg.AppName, cfg.Database.Host, cfg.Database.Port)
 func LoadInto(config interface{}) error {
 	if config == nil {
 		return fmt.Errorf("config cannot be nil")
@@ -72,8 +104,8 @@ func buildPath(prefix, tag string) string {
 // setFieldFromEnv sets a field value from environment variable
 func setFieldFromEnv(fieldValue reflect.Value, field reflect.StructField, envKey string) error {
 	// Get value from environment or use default
-	envValue := os.Getenv(envKey)
-	if envValue == "" {
+	envValue, exists := os.LookupEnv(envKey)
+	if !exists {
 		envValue = field.Tag.Get("default")
 	}
 	
@@ -111,6 +143,9 @@ func setFieldFromEnv(fieldValue reflect.Value, field reflect.StructField, envKey
 	case reflect.Struct:
 		// Handle nested structs recursively
 		return populateStruct(fieldValue, envKey)
+	case reflect.Ptr:
+		// Skip pointer fields for now (could be enhanced later)
+		return nil
 	default:
 		return fmt.Errorf("unsupported field type: %s", fieldValue.Kind())
 	}

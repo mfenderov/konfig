@@ -3,7 +3,6 @@ package konfig
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"testing"
 )
 
@@ -105,23 +104,23 @@ func BenchmarkLoadInto_LargeStruct(b *testing.B) {
 	}
 
 	type Config struct {
-		App      string          `konfig:"benchlarge.app.name" default:"myapp"`
-		Version  string          `konfig:"benchlarge.app.version" default:"1.0.0"`
-		Debug    string          `konfig:"benchlarge.app.debug" default:"false"`
-		Database DatabaseConfig  `konfig:"benchlarge.database"`
-		Server   ServerConfig    `konfig:"benchlarge.server"`
-		Logging  LoggingConfig   `konfig:"benchlarge.logging"`
-		Redis    RedisConfig     `konfig:"benchlarge.redis"`
+		App      string         `konfig:"benchlarge.app.name" default:"myapp"`
+		Version  string         `konfig:"benchlarge.app.version" default:"1.0.0"`
+		Debug    string         `konfig:"benchlarge.app.debug" default:"false"`
+		Database DatabaseConfig `konfig:"benchlarge.database"`
+		Server   ServerConfig   `konfig:"benchlarge.server"`
+		Logging  LoggingConfig  `konfig:"benchlarge.logging"`
+		Redis    RedisConfig    `konfig:"benchlarge.redis"`
 	}
 
 	// Set up some environment variables
 	envVars := map[string]string{
-		"benchlarge.app.name":            "bench-app",
-		"benchlarge.database.host":       "db.example.com",
-		"benchlarge.database.port":       "3306",
-		"benchlarge.server.port":         "9090",
-		"benchlarge.logging.level":       "debug",
-		"benchlarge.redis.host":          "redis.example.com",
+		"benchlarge.app.name":      "bench-app",
+		"benchlarge.database.host": "db.example.com",
+		"benchlarge.database.port": "3306",
+		"benchlarge.server.port":   "9090",
+		"benchlarge.logging.level": "debug",
+		"benchlarge.redis.host":    "redis.example.com",
 	}
 
 	for key, value := range envVars {

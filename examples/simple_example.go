@@ -58,8 +58,8 @@ func main() {
 	// Display loaded configuration
 	fmt.Printf("📱 Application: %s v%s (Debug: %s)\n", config.AppName, config.Version, config.Debug)
 	fmt.Printf("🌐 Server: %s:%s\n", config.Server.Host, config.Server.Port)
-	fmt.Printf("🗄️  Database: %s@%s:%s/%s\n", 
-		config.Database.User, config.Database.Host, 
+	fmt.Printf("🗄️  Database: %s@%s:%s/%s\n",
+		config.Database.User, config.Database.Host,
 		config.Database.Port, config.Database.Name)
 
 	// Check current profile

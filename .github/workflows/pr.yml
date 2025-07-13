@@ -16,11 +16,8 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Dependencies
-        run: make deps
-
-      - name: Test
-        run: make test
+      - name: Quality Checks
+        run: make ci
   ValidatePR:
     runs-on: ubuntu-latest
     steps:

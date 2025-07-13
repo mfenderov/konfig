@@ -10,8 +10,8 @@ import (
 
 // Example demonstrating comprehensive struct-based configuration with konfig
 
-// DatabaseConfig represents database connection settings
-type DatabaseConfig struct {
+// ExampleDatabaseConfig represents database connection settings
+type ExampleDatabaseConfig struct {
 	Host            string `konfig:"host" default:"localhost"`
 	Port            string `konfig:"port" default:"5432"`
 	Name            string `konfig:"name" default:"myapp"`
@@ -22,8 +22,8 @@ type DatabaseConfig struct {
 	ConnMaxLifetime string `konfig:"conn_max_lifetime" default:"1h"`
 }
 
-// ServerConfig represents HTTP server settings
-type ServerConfig struct {
+// ExampleServerConfig represents HTTP server settings
+type ExampleServerConfig struct {
 	Host           string     `konfig:"host" default:"0.0.0.0"`
 	Port           string     `konfig:"port" default:"8080"`
 	ReadTimeout    string     `konfig:"read_timeout" default:"30s"`
@@ -122,8 +122,8 @@ type TracingConfig struct {
 // AppConfig represents the complete application configuration
 type AppConfig struct {
 	Application ApplicationConfig `konfig:"application"`
-	Server      ServerConfig      `konfig:"server"`
-	Database    DatabaseConfig    `konfig:"database"`
+	Server      ExampleServerConfig      `konfig:"server"`
+	Database    ExampleDatabaseConfig    `konfig:"database"`
 	Logging     LoggingConfig     `konfig:"logging"`
 	Security    SecurityConfig    `konfig:"security"`
 	Redis       RedisConfig       `konfig:"redis"`
@@ -139,7 +139,7 @@ type ApplicationConfig struct {
 	Description string `konfig:"description" default:"My awesome application"`
 }
 
-func main() {
+func RunStructExample() {
 	fmt.Println("🚀 Konfig Struct-Based Configuration Example")
 	fmt.Println("============================================")
 
