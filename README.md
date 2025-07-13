@@ -14,11 +14,14 @@ konfig aims to simplify your development workflow by offering:
 ## Features
 
 *   **YAML-based Configuration:** Load your application configurations from clearly structured and human-readable YAML files.
+*   **Struct-based Configuration (NEW):** Automatically populate Go structs with configuration values using struct tags, providing type safety and better IDE support.
 *   **Profile-specific Configurations:** Define default configurations in `application.yaml` and override or extend them with profile-specific files like `application-dev.yaml` or `application-prod.yaml`.
 *   **Environment Variable Substitution:** Use environment variables directly within your YAML files for dynamic configuration values (e.g., `db_host: ${DB_HOST:localhost}`). If the environment variable `DB_HOST` is set, its value will be used; otherwise, `localhost` will be the default.
 *   **Environment Variable Overrides:** Configuration values loaded from files are automatically exposed as environment variables. This allows you to override any configuration setting by simply setting an environment variable with the corresponding key (e.g., setting `SERVER_PORT=8081` in your environment will override the `server.port` value from your YAML files).
 *   **Profile Selection via Command-Line:** Easily switch between configuration profiles using command-line flags (`-p` or `--profile`). For example, running your application with `-p dev` will load the `application-dev.yaml` profile.
 *   **Automatic Key Flattening:** Nested YAML keys are automatically flattened into a dot-separated format. For instance, a YAML structure like `server: {port: 8080}` will be accessible as `server.port`.
+*   **Nested Struct Support:** Deep nesting of configuration structures with automatic prefix handling.
+*   **Default Value Support:** Built-in default values using struct tags when configuration keys are not provided.
 
 ## Installation
 
@@ -102,6 +105,10 @@ fmt.Printf("Current active profile: %s\n", activeProfile)
 
 ### Accessing Configuration Values
 
+There are two main ways to access configuration values with konfig:
+
+#### 1. Environment Variable Access (Traditional)
+
 `konfig` loads all configuration key-value pairs into the application's environment. This means you can access any configuration value using the standard `os.Getenv()` function. Keys are flattened, so a nested key like `server: { port: 8080 }` in YAML becomes `server.port`.
 
 ```go
@@ -128,6 +135,131 @@ func main() {
     // Example: Accessing a value that might use environment variable substitution
     apiKey := os.Getenv("security.api_key")
     fmt.Printf("API Key: %s\n", apiKey)
+}
+```
+
+#### 2. Struct-Based Configuration (Recommended)
+
+**New in v0.17.0:** konfig now supports automatic population of Go structs using struct tags. This approach provides type safety, better IDE support, and cleaner code organization.
+
+```go
+import (
+    "fmt"
+    "log"
+    "github.com/mfenderov/konfig"
+)
+
+// Define your configuration structure with konfig tags
+type DatabaseConfig struct {
+    Host     string `konfig:"host" default:"localhost"`
+    Port     string `konfig:"port" default:"5432"`
+    Name     string `konfig:"name" default:"myapp"`
+    User     string `konfig:"user" default:"postgres"`
+    Password string `konfig:"password" default:"secret"`
+}
+
+type ServerConfig struct {
+    Host string `konfig:"host" default:"0.0.0.0"`
+    Port string `konfig:"port" default:"8080"`
+}
+
+type AppConfig struct {
+    Name     string         `konfig:"application.name" default:"MyApp"`
+    Version  string         `konfig:"application.version" default:"1.0.0"`
+    Database DatabaseConfig `konfig:"database"`
+    Server   ServerConfig   `konfig:"server"`
+}
+
+func main() {
+    // Load configuration into struct
+    var config AppConfig
+    err := konfig.LoadInto(&config)
+    if err != nil {
+        log.Fatalf("Failed to load configuration: %v", err)
+    }
+
+    // Access configuration with type safety
+    fmt.Printf("App: %s v%s\n", config.Name, config.Version)
+    fmt.Printf("Server: %s:%s\n", config.Server.Host, config.Server.Port)
+    fmt.Printf("Database: %s@%s:%s/%s\n", 
+        config.Database.User, config.Database.Host, 
+        config.Database.Port, config.Database.Name)
+}
+```
+
+**Struct Tag Reference:**
+
+- `konfig:"key.path"` - Maps the field to a configuration key (supports dot notation for nested keys)
+- `default:"value"` - Provides a default value if the configuration key is not set
+- Fields without `konfig` tags are ignored during population
+
+**Benefits of Struct-Based Configuration:**
+- **Type Safety:** Compile-time checking prevents runtime errors
+- **IDE Support:** Auto-completion and refactoring support
+- **Documentation:** Struct fields serve as self-documenting configuration
+- **Validation:** Easy to add validation logic to your configuration structs
+- **Testing:** Simple to create test configurations by initializing structs
+
+#### Advanced Struct-Based Examples
+
+**Deeply Nested Configuration:**
+
+```go
+type SecurityConfig struct {
+    JWT struct {
+        Secret          string `konfig:"secret" default:"changeme"`
+        ExpirationHours int    `konfig:"expiration_hours" default:"24"`
+    } `konfig:"jwt"`
+    API struct {
+        RateLimit struct {
+            RequestsPerMinute int `konfig:"requests_per_minute" default:"100"`
+            Burst             int `konfig:"burst" default:"10"`
+        } `konfig:"rate_limit"`
+    } `konfig:"api"`
+}
+
+type AppConfig struct {
+    Security SecurityConfig `konfig:"security"`
+}
+```
+
+**Mixed Environment and Default Values:**
+
+```go
+type Config struct {
+    // Environment variable: DB_HOST, fallback to default
+    DBHost     string `konfig:"database.host" default:"localhost"`
+    
+    // Must be provided via environment or YAML
+    APIKey     string `konfig:"security.api_key"`
+    
+    // Optional value with no default
+    ExtraConfig string `konfig:"app.extra_config"`
+}
+```
+
+**Configuration with Profile-Aware Logic:**
+
+```go
+func main() {
+    var config AppConfig
+    err := konfig.LoadInto(&config)
+    if err != nil {
+        log.Fatalf("Failed to load configuration: %v", err)
+    }
+
+    // Add profile-specific logic
+    if konfig.IsDevProfile() {
+        // Development-specific configuration
+        config.Server.Host = "localhost" // Override for dev
+        fmt.Println("🔧 Development mode enabled")
+    } else if konfig.IsProdProfile() {
+        // Production validation
+        if config.Database.Password == "secret" {
+            log.Fatal("Production requires secure database password")
+        }
+        fmt.Println("🚀 Production mode enabled")
+    }
 }
 ```
 
@@ -176,6 +308,134 @@ logging:
   level: debug # More verbose logging for dev
 ```
 When the `dev` profile is active, `server.port` will be `3000` and `database.url` will be the one specified in `application-dev.yaml`. `application.name` would still be `MyApp`.
+
+## API Reference
+
+### Core Functions
+
+#### `konfig.Load() error`
+Loads the default configuration files (`application.yaml` and active profile files) and populates environment variables.
+
+```go
+err := konfig.Load()
+if err != nil {
+    log.Fatalf("Failed to load configuration: %v", err)
+}
+```
+
+#### `konfig.LoadFrom(filepath string) error`
+Loads configuration from a specific YAML file.
+
+```go
+err := konfig.LoadFrom("config/custom.yaml")
+if err != nil {
+    log.Fatalf("Failed to load custom config: %v", err)
+}
+```
+
+#### `konfig.LoadInto(config interface{}) error` (NEW)
+Loads configuration into a Go struct using struct tags.
+
+```go
+type Config struct {
+    Port string `konfig:"server.port" default:"8080"`
+}
+
+var cfg Config
+err := konfig.LoadInto(&cfg)
+if err != nil {
+    log.Fatalf("Failed to load into struct: %v", err)
+}
+```
+
+**Requirements:**
+- `config` must be a pointer to a struct
+- Struct fields must have `konfig` tags to be populated
+- Supports nested structs with recursive population
+
+### Profile Functions
+
+#### `konfig.GetProfile() string`
+Returns the currently active profile name.
+
+```go
+profile := konfig.GetProfile() // Returns "dev", "prod", or ""
+```
+
+#### `konfig.IsDevProfile() bool`
+Returns true if the current profile is "dev".
+
+```go
+if konfig.IsDevProfile() {
+    // Development-specific logic
+}
+```
+
+#### `konfig.IsProdProfile() bool`
+Returns true if the current profile is "prod".
+
+```go
+if konfig.IsProdProfile() {
+    // Production-specific logic
+}
+```
+
+#### `konfig.IsProfile(name string) bool`
+Returns true if the current profile matches the given name.
+
+```go
+if konfig.IsProfile("staging") {
+    // Staging-specific logic
+}
+```
+
+### Struct Tag Reference
+
+When using `LoadInto()`, struct fields can use the following tags:
+
+- **`konfig:"key.path"`** - Maps the field to a configuration key (required for field to be populated)
+- **`default:"value"`** - Provides a default value if the configuration key is not found
+
+**Examples:**
+
+```go
+type Config struct {
+    // Simple key mapping with default
+    Host string `konfig:"server.host" default:"localhost"`
+    
+    // Nested key mapping
+    DBPassword string `konfig:"database.auth.password" default:"secret"`
+    
+    // No default - will be empty string if not found
+    APIKey string `konfig:"security.api_key"`
+    
+    // Ignored field (no konfig tag)
+    RuntimeValue string
+}
+```
+
+### Error Handling
+
+All konfig functions return errors that should be handled appropriately:
+
+```go
+// Loading errors
+if err := konfig.Load(); err != nil {
+    log.Fatalf("Configuration loading failed: %v", err)
+}
+
+// Struct validation errors
+if err := konfig.LoadInto(&config); err != nil {
+    switch {
+    case strings.Contains(err.Error(), "must be a pointer"):
+        log.Fatal("Config must be passed as pointer (&config)")
+    case strings.Contains(err.Error(), "must be a struct"):
+        log.Fatal("Config must be a struct type")
+    default:
+        log.Fatalf("Configuration error: %v", err)
+    }
+}
+```
 
 ## Configuration File Structure
 

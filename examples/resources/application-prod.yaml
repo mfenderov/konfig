@@ -1,0 +1,61 @@
+# Production profile configuration
+# Overrides values from application.yaml for production environment
+
+application:
+  environment: "production"
+  debug: false
+
+server:
+  port: ${SERVER_PORT:80}
+  
+  tls:
+    enabled: true
+    cert_file: ${TLS_CERT_FILE:/etc/ssl/certs/app.crt}
+    key_file: ${TLS_KEY_FILE:/etc/ssl/private/app.key}
+  
+  cors:
+    allowed_origins: ${CORS_ORIGINS:https://myapp.com,https://www.myapp.com}
+
+database:
+  host: ${DB_HOST}  # Must be provided in production
+  port: ${DB_PORT:5432}
+  name: ${DB_NAME}  # Must be provided in production
+  user: ${DB_USER}  # Must be provided in production  
+  password: ${DB_PASSWORD}  # Must be provided in production
+  ssl_mode: "require"  # Require SSL in production
+  max_connections: "200"
+
+logging:
+  level: "warn"     # Less verbose in production
+  format: "json"    # Structured logging for parsing
+  output: "/var/log/app.log"
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}  # Must be provided and secure
+    expiration_hours: "24"
+    issuer: "myapp-production"
+  
+  api:
+    rate_limit:
+      requests_per_minute: "60"   # Stricter rate limiting
+      burst: "5"
+      enabled: true
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD}
+  enabled: true
+
+monitoring:
+  metrics:
+    enabled: true
+  
+  health:
+    enabled: true
+  
+  tracing:
+    enabled: true
+    jaeger_endpoint: ${JAEGER_ENDPOINT}
+    service_name: "myapp-production"

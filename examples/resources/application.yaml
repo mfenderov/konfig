@@ -1,0 +1,79 @@
+# Example YAML configuration for struct-based konfig usage
+# This file demonstrates how to structure YAML for use with LoadInto()
+
+application:
+  name: "konfig-example-app"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+  description: "Example application demonstrating konfig struct-based configuration"
+
+server:
+  host: "0.0.0.0"
+  port: ${SERVER_PORT:8080}
+  read_timeout: "30s"
+  write_timeout: "30s"
+  max_header_bytes: "1048576"
+  
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+  
+  cors:
+    enabled: true
+    allowed_origins: "http://localhost:3000,http://localhost:8080"
+    allowed_methods: "GET,POST,PUT,DELETE,OPTIONS"
+    allowed_headers: "Content-Type,Authorization,X-Requested-With"
+
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  name: ${DB_NAME:myapp}
+  user: ${DB_USER:postgres}
+  password: ${DB_PASSWORD:secret}
+  ssl_mode: ${DB_SSL_MODE:disable}
+  max_connections: ${DB_MAX_CONNECTIONS:100}
+  conn_max_lifetime: "1h"
+
+logging:
+  level: ${LOG_LEVEL:info}
+  format: ${LOG_FORMAT:json}
+  output: ${LOG_OUTPUT:stdout}
+  max_size: "100"    # MB
+  max_backups: "3"
+  max_age: "28"      # days
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-change-in-production}
+    expiration_hours: ${JWT_EXPIRATION:24}
+    issuer: ${JWT_ISSUER:konfig-example}
+  
+  api:
+    rate_limit:
+      requests_per_minute: ${RATE_LIMIT_RPM:100}
+      burst: ${RATE_LIMIT_BURST:10}
+      enabled: ${RATE_LIMIT_ENABLED:true}
+
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  db: ${REDIS_DB:0}
+  enabled: ${REDIS_ENABLED:false}
+
+monitoring:
+  metrics:
+    enabled: ${METRICS_ENABLED:true}
+    port: ${METRICS_PORT:9090}
+    path: "/metrics"
+  
+  health:
+    enabled: ${HEALTH_ENABLED:true}
+    path: "/health"
+  
+  tracing:
+    enabled: ${TRACING_ENABLED:false}
+    jaeger_endpoint: ${JAEGER_ENDPOINT:http://localhost:14268/api/traces}
+    service_name: ${TRACING_SERVICE_NAME:konfig-example}
