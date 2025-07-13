@@ -40,3 +40,8 @@ func IsDevProfile() bool {
 func IsProfile(profile string) bool {
 	return getProfile() == profile
 }
+
+// GetProfile returns the currently active profile name
+func GetProfile() string {
+	return getProfile()
+}
