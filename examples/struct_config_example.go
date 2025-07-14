@@ -121,13 +121,13 @@ type TracingConfig struct {
 
 // AppConfig represents the complete application configuration
 type AppConfig struct {
-	Application ApplicationConfig `konfig:"application"`
-	Server      ExampleServerConfig      `konfig:"server"`
-	Database    ExampleDatabaseConfig    `konfig:"database"`
-	Logging     LoggingConfig     `konfig:"logging"`
-	Security    SecurityConfig    `konfig:"security"`
-	Redis       RedisConfig       `konfig:"redis"`
-	Monitoring  MonitoringConfig  `konfig:"monitoring"`
+	Application ApplicationConfig     `konfig:"application"`
+	Server      ExampleServerConfig   `konfig:"server"`
+	Database    ExampleDatabaseConfig `konfig:"database"`
+	Logging     LoggingConfig         `konfig:"logging"`
+	Security    SecurityConfig        `konfig:"security"`
+	Redis       RedisConfig           `konfig:"redis"`
+	Monitoring  MonitoringConfig      `konfig:"monitoring"`
 }
 
 // ApplicationConfig represents basic application metadata
@@ -146,15 +146,15 @@ func RunStructExample() {
 	// Demonstrate setting some environment variables to override defaults
 	fmt.Println("\n📋 Setting up example environment variables...")
 	envVars := map[string]string{
-		"application.name":        "example-app",
-		"application.version":     "2.0.0",
-		"server.port":            "9090",
-		"database.host":          "db.example.com",
-		"database.port":          "3306",
-		"security.jwt.secret":    "super-secret-jwt-key",
-		"logging.level":          "debug",
-		"redis.enabled":          "true",
-		"redis.host":             "redis.example.com",
+		"application.name":           "example-app",
+		"application.version":        "2.0.0",
+		"server.port":                "9090",
+		"database.host":              "db.example.com",
+		"database.port":              "3306",
+		"security.jwt.secret":        "super-secret-jwt-key",
+		"logging.level":              "debug",
+		"redis.enabled":              "true",
+		"redis.host":                 "redis.example.com",
 		"monitoring.metrics.enabled": "true",
 		"monitoring.tracing.enabled": "true",
 	}
@@ -203,8 +203,8 @@ func RunStructExample() {
 	fmt.Printf("\n🔐 Security Configuration:\n")
 	fmt.Printf("   JWT Secret: %s\n", maskSecret(config.Security.JWT.Secret))
 	fmt.Printf("   JWT Expiration: %s hours\n", config.Security.JWT.ExpirationHours)
-	fmt.Printf("   Rate Limit: %s req/min (burst: %s)\n", 
-		config.Security.API.RateLimit.RequestsPerMinute, 
+	fmt.Printf("   Rate Limit: %s req/min (burst: %s)\n",
+		config.Security.API.RateLimit.RequestsPerMinute,
 		config.Security.API.RateLimit.Burst)
 
 	// Logging configuration
@@ -263,6 +263,9 @@ func RunStructExample() {
 		os.Unsetenv(key)
 	}
 }
+
+// To run this example:
+// go run simple_example.go struct_config_example.go
 
 // maskSecret masks sensitive information for display
 func maskSecret(secret string) string {

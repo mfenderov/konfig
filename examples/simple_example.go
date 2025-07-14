@@ -74,4 +74,6 @@ func main() {
 	fmt.Println("Try running with different profiles:")
 	fmt.Println("  go run simple_example.go -p dev")
 	fmt.Println("  go run simple_example.go -p prod")
+	fmt.Println("\nFor a more comprehensive example, run:")
+	fmt.Println("  go run simple_example.go struct_config_example.go")
 }

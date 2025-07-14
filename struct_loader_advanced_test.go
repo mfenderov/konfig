@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// Advanced tests for the LoadInto functionality: nested structs and error handling
+
 func TestLoadInto_NestedStruct(t *testing.T) {
 	// Set environment values for nested structure
 	os.Setenv("nested.server.host", "nestedhost")
@@ -115,5 +117,90 @@ func TestLoadInto_DeepNestedStructs(t *testing.T) {
 
 	if cfg.Deep.Level2.Simple != "simple_value" {
 		t.Errorf("Expected simple value 'simple_value', got '%s'", cfg.Deep.Level2.Simple)
+	}
+}
+
+// Error handling and edge case tests
+
+func TestLoadInto_InvalidInput(t *testing.T) {
+	// Test with nil pointer
+	err := LoadInto(nil)
+	if err == nil {
+		t.Error("Expected error for nil input")
+	}
+
+	// Test with non-pointer
+	var cfg struct{}
+	err = LoadInto(cfg)
+	if err == nil {
+		t.Error("Expected error for non-pointer input")
+	}
+
+	// Test with pointer to non-struct
+	var str string
+	err = LoadInto(&str)
+	if err == nil {
+		t.Error("Expected error for pointer to non-struct")
+	}
+}
+
+func TestLoadInto_FieldWithoutKonfigTag(t *testing.T) {
+	type Config struct {
+		WithTag    string `konfig:"tagged.field" default:"tagged_value"`
+		WithoutTag string // No konfig tag, should be ignored
+	}
+
+	var cfg Config
+	err := LoadInto(&cfg)
+
+	if err != nil {
+		t.Fatalf("LoadInto failed: %v", err)
+	}
+
+	if cfg.WithTag != "tagged_value" {
+		t.Errorf("Expected WithTag 'tagged_value', got '%s'", cfg.WithTag)
+	}
+
+	if cfg.WithoutTag != "" {
+		t.Errorf("Expected WithoutTag to be empty, got '%s'", cfg.WithoutTag)
+	}
+}
+
+func TestLoadInto_EmptyStructNoError(t *testing.T) {
+	type Config struct{}
+
+	var cfg Config
+	err := LoadInto(&cfg)
+
+	if err != nil {
+		t.Errorf("Expected no error for empty struct, got: %v", err)
+	}
+}
+
+func TestLoadInto_StructWithOnlyUntaggedFields(t *testing.T) {
+	type Config struct {
+		Field1 string
+		Field2 int
+		Field3 bool
+	}
+
+	var cfg Config
+	err := LoadInto(&cfg)
+
+	if err != nil {
+		t.Errorf("Expected no error for struct with only untagged fields, got: %v", err)
+	}
+
+	// All fields should remain at their zero values
+	if cfg.Field1 != "" {
+		t.Errorf("Expected Field1 to be empty, got '%s'", cfg.Field1)
+	}
+
+	if cfg.Field2 != 0 {
+		t.Errorf("Expected Field2 to be 0, got %d", cfg.Field2)
+	}
+
+	if cfg.Field3 != false {
+		t.Errorf("Expected Field3 to be false, got %v", cfg.Field3)
 	}
 }

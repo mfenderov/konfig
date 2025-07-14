@@ -59,7 +59,7 @@ security:
 redis:
   host: ${REDIS_HOST:localhost}
   port: ${REDIS_PORT:6379}
-  password: ${REDIS_PASSWORD:}
+  password: ${REDIS_PASSWORD:""}
   db: ${REDIS_DB:0}
   enabled: ${REDIS_ENABLED:false}
 
