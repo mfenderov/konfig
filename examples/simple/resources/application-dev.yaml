@@ -1,0 +1,40 @@
+# Development profile configuration
+# Overrides values from application.yaml for development environment
+
+application:
+  environment: "development"
+  debug: true
+
+server:
+  port: "3000"  # Different port for dev
+  
+  cors:
+    allowed_origins: "*"  # Allow all origins in dev
+
+database:
+  host: "localhost"
+  port: "5432"
+  name: "myapp_dev"
+  ssl_mode: "disable"
+
+logging:
+  level: "debug"    # More verbose logging
+  format: "text"    # Human-readable format for dev
+
+security:
+  jwt:
+    secret: "dev-jwt-secret-not-for-production"
+    expiration_hours: "168"  # 7 days for dev convenience
+  
+  api:
+    rate_limit:
+      requests_per_minute: "1000"  # More lenient rate limiting
+      enabled: false              # Disable rate limiting in dev
+
+redis:
+  enabled: false  # Disable Redis in dev by default
+
+monitoring:
+  tracing:
+    enabled: true
+    service_name: "konfig-example-dev"

@@ -48,7 +48,9 @@ konfig/
 ├── loader.go              # YAML parsing and loading
 ├── *_test.go              # Test files
 ├── examples/              # Usage examples
-├── test-proj/             # Integration tests
+├── testdata/
+│   ├── configs/           # Test configuration files
+│   └── integration/       # Integration tests
 └── resources/             # Test configuration files
 ```
 

@@ -1,3 +1,0 @@
-custom:
-  key: ${CUSTOM_VALUE:default}
-  key2: ${UNSET_VALUE:default_value} 

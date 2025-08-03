@@ -8,25 +8,30 @@
 # Test binary, built with `go test -c`
 *.test
 
-# Output of the go coverage tool
+# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-coverage.html
-docs.txt
+
+# Dependency directories (remove the comment below to include it)
+vendor/
 
 # Go workspace file
 go.work
+go.work.sum
 
-# Dependency directories
-vendor/
-
-# Go module cache
-/pkg/
+# Build artifacts and generated files
+.build/
+*.out
+coverage.html
+coverage.txt
+docs.txt
+test-results.md
 
 # IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS generated files
 .DS_Store
@@ -36,7 +41,45 @@ vendor/
 .Trashes
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # Temporary files
 *.tmp
 *.temp
+*.log
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Development and analysis artifacts (project-specific)
+competitive-benchmarks/
+integration-test-advanced/
+*_analysis.md
+*_audit.md
+
+# Test artifacts
+/tmp/
+test_output/
+benchmark_results/
+
+# Local configuration files (for testing)
+local_config.yaml
+test_config.yaml
+*.local.yaml
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Generated documentation
+/docs/generated/
+godoc/
+
+# Security sensitive files
+*.key
+*.pem
+*.crt
+secrets.yaml
